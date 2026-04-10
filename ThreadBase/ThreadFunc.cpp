@@ -67,7 +67,7 @@ void threadFunction(){
             &ThreadClass::asyncTask, 
             point
         )
-    );  // 创建异步任务并调用
+    );  // 创建任务并获取异步与调用
     auto pthread_got = point->asyncTask();  // 主线程调用
     std::cout << "addData(Pthread): " << pthread_got << std::endl;  // 主线程调用结果
     auto task_result = create_task.get();  // 等待异步任务结束并获取
@@ -75,21 +75,21 @@ void threadFunction(){
 
     // packaged_task异步
     std::function<int()> packtofunc(std::bind(&ThreadClass::asyncTask, point));  // 包装成函数
-    std::packaged_task<int()> create_task2(packtofunc);  // 创建异步任务
-    auto get_task2 = create_task2.get_future();     // 获取异步任务
-    std::thread t9(std::move(create_task2));        // 通过线程调用异步任务
+    std::packaged_task<int()> packtotask(packtofunc);  // 打包成任务
+    auto get_future = packtotask.get_future();     // 对任务获取异步
+    std::thread t9(std::move(packtotask));        // 通过线程调用异步任务
     auto pthread_got2 = point->asyncTask();  // 主线程调用
     std::cout << "addData(Pthread): " << pthread_got2 << std::endl;  // 主线程调用结果
     if(t9.joinable()) t9.join();       // 等待异步线程结束
-    auto task_result2 = get_task2.get();  // 等待异步任务结束并获取
+    auto task_result2 = get_future.get();  // 等待异步任务结束并获取
     std::cout << "addData(Packaged_Task): " << task_result2 << std::endl;  // 异步任务调用结果
 
     // promise异步
-    std::promise<int> create_task3;  // 创建异步任务
-    auto get_task3 = create_task3.get_future();  // 获取异步任务
+    std::promise<int> create_task3;  // 创建任务
+    auto got_future = create_task3.get_future();  // 对任务获取异步
     std::thread t10(&ThreadClass::asyncTaskPromise, point, std::move(create_task3));  // 通过线程调用异步任务
     if(t10.joinable()) t10.join();  // 等待异步线程结束
-    auto task_result3 = get_task3.get();  // 等待异步任务结束并获取
+    auto task_result3 = got_future.get();  // 等待异步任务结束并获取
     std::cout << "addData(Promise): " << task_result3 << std::endl;  // 异步任务调用结果
 }
 
