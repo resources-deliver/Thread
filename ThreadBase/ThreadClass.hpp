@@ -9,6 +9,7 @@
 #include <condition_variable>  // 条件变量
 #include <queue>  // 队列
 #include <future>  // 异步调用
+#include <functional>
 
 class ThreadClass{
 public:
@@ -16,20 +17,22 @@ public:
 private:
     friend void threadFunction();  // 友元函数
     void funcD(std::string& str);
-    void funcE();
-    void funcF();
-    void funcG();
-    void funcH();
+    void addLock();
+    void deadLock1();
+    void deadLock2();
+    void delayLock();
     void producer();
     void consumer();
-    int funcI();
+    int asyncTask();
+    void asyncTaskPromise(std::promise<int>&& prom);
     void atomicOperator();
     std::mutex mtx, mtx1, mtx2, workMutex;  // 互斥锁
     std::timed_mutex delaydmtx;  // 延迟互斥锁
     std::condition_variable condVar;  // 条件变量做有关放取任务桥梁
     std::queue<int> workQueue;  // 任务队列
     int addData = 0;
-    std::atomic<int> atomicData = 0;
+    // std::atomic<int> atomicData = 0;  // 原子变量(C++11禁止拷贝构造和赋值操作)
+    std::atomic<int> atomicData{0};  // 原子变量(C++11标准可编译)
 };
 
 void funcA();
